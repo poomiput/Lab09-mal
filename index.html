@@ -315,11 +315,31 @@ JZ   &lt;ที่อยู่ success&gt;   ← ตัวที่ 4: เปล
       <li>DIE → ไม่ pack</li>
       <li>Ghidra → Filter <code>custom_anti_analysis_check</code> — วนลูป 1,000,000 รอบวัดเวลา ถ้าเร็ว set byte ที่ 3 เป็น <code>0x57</code></li>
       <li>Filter <code>extract_file_next</code> — เช็คว่า 3 byte XOR 0x1F แล้ว decode ได้ <code>"O+H"</code></li>
-      <li>คำนวณ byte ต้นฉบับที่ต้องมี: <code>50 34 57</code> (P, 4, W)</li>
-      <li>หาตำแหน่ง <code>DAT_140004000</code> ใน Listing → เปิด hex editor (เช่น HxD) ที่ไฟล์สำเนา → ไปที่ file offset <code>0x3601</code> → เช็คว่าเป็น <code>58</code> จริงไหม → เปลี่ยนเป็น <code>34</code> → save</li>
-      <li class="note-inline"><b>ไม่ต้อง patch jump เลย</b> — แค่แก้ data byte ตัวนี้ timing check เดิมทำงานถูกอยู่แล้ว</li>
-      <li>รัน → MessageBox "Congratulations!" → เปิด <code>flag.txt</code> ต้อง<b>อ่านออก</b> (ถ้าอ่านไม่ออก = key ยังผิด)</li>
+      <li>คำนวณ byte ต้นฉบับที่ต้องมี: <code>50 34 57</code> (P, 4, W) — ข้อนี้ <b>ไม่ patch jump</b> เพราะ timing check ทำงานถูกอยู่แล้ว ปัญหาคือ byte ตัวกลางฝังผิดค่าไว้ในไฟล์ตรง ๆ ต้องแก้ด้วย hex editor</li>
     </ol>
+
+    <div class="note tip"><b>ครั้งแรกที่ใช้ hex editor:</b> ทำตาม sub-step ด้านล่างทีละอย่าง ไม่ต้องรู้จักโปรแกรมมาก่อนก็ทำได้</div>
+
+    <ol class="steps">
+      <li><b>ติดตั้ง HxD</b> (โปรแกรม hex editor ฟรี) — เปิด PowerShell (as Administrator) แล้วรัน:
+        <pre>winget install -e --id MHNexus.HxD</pre>
+        รอจนติดตั้งเสร็จ (ไม่มี output อะไรพิเศษ แค่ prompt กลับมา)
+      </li>
+      <li><b>เตรียมไฟล์สำเนา</b> — ห้ามแก้ไฟล์ต้นฉบับ ก็อปไฟล์ก่อน:
+        <pre>copy ClockCheck.exe ClockCheck_patched.exe</pre>
+      </li>
+      <li><b>เปิดไฟล์ใน HxD</b> — เปิดโปรแกรม HxD (หาจาก Start Menu พิมพ์ "HxD") → <code>File → Open</code> → เลือก <code>ClockCheck_patched.exe</code>
+        <br>จะเห็นหน้าจอแบ่ง 3 คอลัมน์: เลข offset (ซ้ายสุด), ตัวเลข hex เป็นคู่ ๆ (ตรงกลาง), ตัวอักษร ASCII (ขวาสุด) — ทั้งหมดคือเนื้อไฟล์แบบ raw byte
+      </li>
+      <li><b>ไปที่ตำแหน่งที่ต้องแก้</b> — กด <code>Ctrl+G</code> (เปิดกล่อง "Go to offset") พิมพ์ <code>3601</code> (ไม่ต้องใส่ <code>0x</code> นำหน้า, HxD default เป็น hex อยู่แล้ว) → กด OK
+        <br>cursor จะกระโดดไปตำแหน่งนั้น มี byte ถูก highlight ไว้
+      </li>
+      <li><b>ตรวจว่าถูกตำแหน่ง</b> — byte ที่ highlight ต้องเป็น <code>58</code> (ถ้าดูคอลัมน์ ASCII ด้านขวาจะเห็นตัวอักษร <code>X</code> ตรงกัน) ถ้าไม่ตรง แปลว่ากด Ctrl+G ผิดค่า ลองใหม่</li>
+      <li><b>แก้ค่า</b> — คลิกที่ byte <code>58</code> นั้น 1 ครั้งให้ cursor กระพริบอยู่ตรงนั้น แล้วพิมพ์ <code>34</code> ตรง ๆ เลย (พิมพ์ทับได้ทันที ไม่ต้องลบก่อน) — byte จะเปลี่ยนจาก <code>58</code> เป็น <code>34</code> ทันที และตัวอักษรฝั่ง ASCII จะเปลี่ยนจาก <code>X</code> เป็น <code>4</code></li>
+      <li><b>บันทึกไฟล์</b> — กด <code>Ctrl+S</code> (หรือ File → Save) — เสร็จแล้ว</li>
+      <li>double-click <code>ClockCheck_patched.exe</code> รัน → MessageBox <b>"Congratulations!"</b> ขึ้น → เปิด <code>flag.txt</code> ที่ถูกสร้างในโฟลเดอร์เดียวกัน</li>
+    </ol>
+    <div class="note warn"><b>เช็คผลให้ชัวร์:</b> เปิด <code>flag.txt</code> ต้อง<b>อ่านออกเป็นประโยคภาษาคน</b> ถ้าเจอตัวอักษรมั่ว ๆ อ่านไม่ออก แปลว่า byte ที่แก้ยังผิด หรือ save ไม่สำเร็จ ให้กลับไปเช็คขั้นตอน 4-6 ใหม่</div>
     <div class="answer-box">
       <span class="lbl">flag.txt</span>
       <div class="hex">hack me at 127.0.0.1</div>
