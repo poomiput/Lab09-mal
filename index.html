@@ -211,8 +211,14 @@
       <li>Ghidra import → analyze → Filter หา <code>custom_anti_analysis_check</code> → เปิด</li>
       <li>อ่านโค้ด: เช็คไฟล์ <code>npcap.sys</code> 2 รอบติด — key จริงอยู่ path ที่แทบไม่ถึงตามธรรมชาติ</li>
       <li><b>ก่อน patch:</b> ต้องมี Npcap ติดตั้งจริง (เปิด <code>Wireshark</code> ติดตั้งแล้ว หรือรัน <code>sc query npcap</code> ต้องเห็น RUNNING)</li>
-      <li>คลิกบรรทัด <code>if (pFVar1 == NULL) { return "4566..." }</code> ใน Decompile → Listing เลื่อนไปจุดเดียวกัน</li>
-      <li>หา <code>JZ</code> ตรงนั้น → คลิกขวา → <b>Patch Instruction</b> → พิมพ์ <code>JMP</code> ตามด้วย address ปลายทางเดิม → Enter</li>
+      <li>คลิกบรรทัด <code>if (pFVar1 == NULL) { return "4566..." }</code> ใน Decompile → Listing เลื่อนไปจุดเดียวกัน จะเจอ:</li>
+    </ol>
+<pre>CMP   qword ptr [RBP-0x10],0x0
+SETNZ AL
+TEST  AL,AL
+JZ    &lt;ที่อยู่ success&gt;   ← ต้องเปลี่ยนเป็น JMP (ไม่มีเงื่อนไข)</pre>
+    <ol class="steps" start="6">
+      <li>คลิกบรรทัด <code>JZ</code> → คลิกขวา → <b>Patch Instruction</b> → พิมพ์ <code>JMP</code> ตามด้วย address ปลายทางเดิม → Enter</li>
       <li><b>File → Export Program</b> → save เป็น <code>AntiCapture_patched.exe</code></li>
       <li>รันไฟล์ → เห็น <b>Answer</b></li>
     </ol>
@@ -231,15 +237,19 @@
       <li>cmd: <code>copy Anti_Packing.exe Anti_Packing_unpacked.exe</code> → <code>upx -d Anti_Packing_unpacked.exe</code></li>
       <li>Ghidra import ไฟล์ที่ unpack แล้ว → analyze → Filter หา <code>drop_encrypted_file</code> → เปิด</li>
       <li>เลื่อนหาบล็อก <code>if (local_38[15]=='O' && local_38[14]=='T' && local_38[13]=='U' && local_38[12]=='^')</code></li>
-      <li>คลิกบรรทัดนั้นให้ Listing เลื่อนตาม จะเจอ 4 jump ติดกัน:</li>
+      <li>คลิกบรรทัดนั้นให้ Listing เลื่อนตาม จะเจอ 4 ชุดนี้ติดกัน:</li>
     </ol>
-    <div class="table-wrap"><table>
-      <tr><th>Jump</th><th>Patch เป็น</th></tr>
-      <tr><td class="mono">JNZ (เช็ค byte[15])</td><td class="mono after">NOP</td></tr>
-      <tr><td class="mono">JNZ (เช็ค byte[14])</td><td class="mono after">NOP</td></tr>
-      <tr><td class="mono">JNZ (เช็ค byte[13])</td><td class="mono after">NOP</td></tr>
-      <tr><td class="mono">JZ (เช็ค byte[12])</td><td class="mono after">JMP &lt;ปลายทางเดิม&gt;</td></tr>
-    </table></div>
+<pre>CMP  AL,0x4f
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 1: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x54
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 2: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x55
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 3: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x5e
+JZ   &lt;ที่อยู่ success&gt;   ← ตัวที่ 4: เปลี่ยนเป็น JMP (ไม่มีเงื่อนไข)</pre>
     <ol class="steps" start="6">
       <li>Patch ทั้ง 4 จุด (คลิกขวาแต่ละบรรทัด → Patch Instruction) → <b>File → Export Program</b> → save เป็น <code>Anti_Packing_patched.exe</code></li>
       <li>รัน → เห็น <b>Answer</b></li>
@@ -275,8 +285,20 @@
       <li>DIE → ไม่ pack</li>
       <li>Ghidra → Filter หา <code>custom_anti_analysis_check</code> — เช็ค MD5 ตัวเองเทียบกับ <code>WELCOME_TO_THE_DARKNESS.txt</code></li>
       <li class="note-inline"><b>MD5 ตรงก็ยังไม่พอ</b> — key ที่ได้ไม่ลงท้าย AJKP อยู่ดี ต้องไป patch <code>drop_encrypted_file</code> แทน (เหมือน Ch.2 เป๊ะ)</li>
-      <li>Filter หา <code>drop_encrypted_file</code> → เปิด → หา 4 jump แบบเดียวกับ Ch.2</li>
-      <li>Patch: 3 <code>JNZ</code> → <code>NOP</code>, 1 <code>JZ</code> → <code>JMP &lt;ปลายทางเดิม&gt;</code></li>
+      <li>Filter หา <code>drop_encrypted_file</code> → เปิด → เจอ 4 ชุดเดียวกับ Ch.2:</li>
+    </ol>
+<pre>CMP  AL,0x4f
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 1: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x54
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 2: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x55
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 3: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x5e
+JZ   &lt;ที่อยู่ success&gt;   ← ตัวที่ 4: เปลี่ยนเป็น JMP (ไม่มีเงื่อนไข)</pre>
+    <ol class="steps" start="5">
       <li><b>File → Export Program</b> → save เป็น <code>Anti_Temper_patched.exe</code> → รัน</li>
     </ol>
     <div class="answer-box">
@@ -311,8 +333,20 @@
     <ol class="steps">
       <li>DIE → ไม่ pack</li>
       <li>Ghidra → Filter <code>custom_anti_analysis_check</code> — เช็ค registry 2 key: ต้องมี <code>Guest Additions</code> แต่ต้องไม่มี <code>DSDT\VBOX__</code> (ขัดแย้งกันเองถ้ารันบน VirtualBox จริง)</li>
-      <li>Filter หา <code>drop_encrypted_file</code> → หา 4 jump แบบเดียวกับ Ch.2/4</li>
-      <li>Patch: 3 <code>JNZ</code> → <code>NOP</code>, 1 <code>JZ</code> → <code>JMP &lt;ปลายทางเดิม&gt;</code></li>
+      <li>Filter หา <code>drop_encrypted_file</code> → เจอ 4 ชุดเดียวกับ Ch.2/4:</li>
+    </ol>
+<pre>CMP  AL,0x4f
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 1: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x54
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 2: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x55
+JNZ  &lt;ที่อยู่ fail&gt;      ← ตัวที่ 3: เปลี่ยนเป็น NOP
+...
+CMP  AL,0x5e
+JZ   &lt;ที่อยู่ success&gt;   ← ตัวที่ 4: เปลี่ยนเป็น JMP (ไม่มีเงื่อนไข)</pre>
+    <ol class="steps" start="4">
       <li><b>File → Export Program</b> → save เป็น <code>VBoxDetection_patched.exe</code> → รัน</li>
     </ol>
     <div class="answer-box">
