@@ -4,29 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Operation Aegis — Lab 09 Walkthrough</title>
-<meta name="description" content="Step-by-step bypass walkthrough for all 6 Anti-Analysis challenges — CP423322 Malware Analysis and Protection, Lab 09.">
+<meta name="description" content="Quick bypass steps for all 6 Anti-Analysis challenges — CP423322 Lab 09.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #F1F4F5;
-    --surface: #FDFEFE;
-    --surface-2: #E7ECEE;
-    --border: #D2DADD;
-    --ink: #10181B;
-    --ink-dim: #56666C;
-    --ink-faint: #8B999E;
-    --accent: #B4650A;
-    --accent-soft: #F3E1CB;
-    --accent2: #0E7C86;
-    --accent2-soft: #D8EEEF;
-    --good: #3F7D3B;
-    --good-soft: #DFEEDC;
-    --danger: #B23B3B;
-    --danger-soft: #F5DEDC;
-    --code-bg: #10181B;
-    --code-ink: #E9EEEF;
+    --bg: #F1F4F5; --surface: #FDFEFE; --surface-2: #E7ECEE; --border: #D2DADD;
+    --ink: #10181B; --ink-dim: #56666C; --ink-faint: #8B999E;
+    --accent: #B4650A; --accent-soft: #F3E1CB;
+    --accent2: #0E7C86; --accent2-soft: #D8EEEF;
+    --good: #3F7D3B; --good-soft: #DFEEDC;
+    --danger: #B23B3B; --danger-soft: #F5DEDC;
+    --code-bg: #10181B; --code-ink: #E9EEEF;
     --shadow: 0 1px 2px rgba(16,24,27,0.04), 0 8px 24px -14px rgba(16,24,27,0.18);
   }
   @media (prefers-color-scheme: dark){
@@ -47,28 +37,23 @@
   body{
     background:var(--bg); color:var(--ink);
     font-family:"Source Sans 3", -apple-system, "Noto Sans Thai", sans-serif;
-    -webkit-font-smoothing:antialiased; line-height:1.6;
+    -webkit-font-smoothing:antialiased; line-height:1.55;
   }
   .mono{ font-family:"JetBrains Mono", ui-monospace, "Noto Sans Thai", monospace; }
   a{ color:inherit; }
 
-  /* ---------- layout shell ---------- */
-  .shell{ display:grid; grid-template-columns:220px 1fr; max-width:1180px; margin:0 auto; }
+  .shell{ display:grid; grid-template-columns:210px 1fr; max-width:1120px; margin:0 auto; }
   .sidebar{
     position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
-    padding:32px 18px 32px 28px; border-right:1px solid var(--border);
+    padding:28px 16px 28px 24px; border-right:1px solid var(--border);
   }
-  .side-title{
-    font-family:"JetBrains Mono", monospace; font-weight:800; font-size:14px;
-    letter-spacing:-0.01em; margin-bottom:4px;
-  }
+  .side-title{ font-family:"JetBrains Mono", monospace; font-weight:800; font-size:14px; margin-bottom:2px; }
   .side-title span{ color:var(--accent); }
-  .side-sub{ font-size:11px; color:var(--ink-faint); margin-bottom:26px; }
+  .side-sub{ font-size:11px; color:var(--ink-faint); margin-bottom:22px; }
   .side-nav{ display:flex; flex-direction:column; gap:2px; }
   .side-nav a{
     font-family:"JetBrains Mono", monospace; font-size:12.5px; text-decoration:none;
-    color:var(--ink-dim); padding:7px 10px; border-radius:6px;
-    display:flex; align-items:center; gap:8px;
+    color:var(--ink-dim); padding:6px 9px; border-radius:6px; display:flex; align-items:center; gap:8px;
   }
   .side-nav a:hover{ background:var(--surface-2); color:var(--ink); }
   .side-nav a .n{
@@ -76,130 +61,95 @@
     color:var(--accent2); font-size:10px; font-weight:700;
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
-  .side-nav .sep{ height:1px; background:var(--border); margin:10px 4px; }
+  .side-nav .sep{ height:1px; background:var(--border); margin:8px 4px; }
 
-  .main{ padding:56px 40px 100px; min-width:0; }
+  .main{ padding:48px 36px 90px; min-width:0; }
 
-  /* ---------- header ---------- */
   .eyebrow{
-    display:flex; align-items:center; gap:10px;
-    font-family:"JetBrains Mono", monospace; font-size:12.5px;
-    letter-spacing:.11em; text-transform:uppercase; color:var(--accent2); margin-bottom:18px;
+    display:flex; align-items:center; gap:10px; font-family:"JetBrains Mono", monospace;
+    font-size:12px; letter-spacing:.11em; text-transform:uppercase; color:var(--accent2); margin-bottom:16px;
   }
-  .eyebrow::before{
-    content:""; width:7px;height:7px;border-radius:50%;
-    background:var(--accent2); box-shadow:0 0 0 3px var(--accent2-soft);
-  }
+  .eyebrow::before{ content:""; width:7px;height:7px;border-radius:50%; background:var(--accent2); box-shadow:0 0 0 3px var(--accent2-soft); }
   h1{
     font-family:"JetBrains Mono", monospace; font-weight:800;
-    font-size:clamp(30px, 4.2vw, 46px); letter-spacing:-0.01em; line-height:1.06;
-    margin:0 0 16px; text-wrap:balance;
+    font-size:clamp(28px, 4vw, 42px); letter-spacing:-0.01em; line-height:1.06; margin:0 0 12px;
   }
   h1 span{ color:var(--accent); }
-  .lede{ font-size:16.5px; color:var(--ink-dim); max-width:70ch; margin:0 0 30px; }
-  .lede b{ color:var(--ink); font-weight:600; }
+  .lede{ font-size:15.5px; color:var(--ink-dim); max-width:68ch; margin:0 0 24px; }
 
-  .meta-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:44px; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:36px; }
   .chip{
-    font-family:"JetBrains Mono", monospace; font-size:12.5px;
-    padding:5px 10px; border-radius:6px; border:1px solid var(--border);
-    background:var(--surface); color:var(--ink-dim); white-space:nowrap;
+    font-family:"JetBrains Mono", monospace; font-size:12px; padding:4px 9px; border-radius:6px;
+    border:1px solid var(--border); background:var(--surface); color:var(--ink-dim);
   }
   .chip b{ color:var(--ink); font-weight:600; }
 
-  /* ---------- progress grid on landing ---------- */
-  .grid6{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:56px;
-  }
+  .grid6{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:44px; }
   .grid6 a{
     text-decoration:none; background:var(--surface); border:1px solid var(--border);
-    border-radius:12px; padding:16px 16px 14px; box-shadow:var(--shadow);
-    display:flex; flex-direction:column; gap:6px;
+    border-radius:10px; padding:12px 14px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:3px;
   }
-  .grid6 .gnum{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-faint); }
-  .grid6 .gname{ font-weight:700; font-size:15px; color:var(--ink); }
-  .grid6 .gtag{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--accent2); }
+  .grid6 .gnum{ font-family:"JetBrains Mono",monospace; font-size:10.5px; color:var(--ink-faint); }
+  .grid6 .gname{ font-weight:700; font-size:14px; color:var(--ink); }
+  .grid6 .gtag{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--accent2); }
 
-  /* ---------- challenge sections ---------- */
   .challenge-head{
-    display:flex; align-items:baseline; gap:14px; margin:70px 0 8px;
-    padding-top:30px; border-top:2px solid var(--border); scroll-margin-top:24px;
+    display:flex; align-items:baseline; gap:12px; margin:52px 0 4px;
+    padding-top:22px; border-top:2px solid var(--border); scroll-margin-top:20px;
   }
   .challenge-num{
-    font-family:"JetBrains Mono", monospace; font-weight:800; font-size:15px;
-    color:var(--accent2); background:var(--accent2-soft);
-    padding:4px 10px; border-radius:6px; flex-shrink:0;
+    font-family:"JetBrains Mono", monospace; font-weight:800; font-size:14px;
+    color:var(--accent2); background:var(--accent2-soft); padding:3px 9px; border-radius:6px;
   }
-  .challenge-head h2{ font-family:"JetBrains Mono", monospace; font-weight:700; font-size:25px; margin:0; }
-  .target-file{ font-family:"JetBrains Mono", monospace; font-size:13.5px; color:var(--ink-dim); margin:0 0 26px; }
+  .challenge-head h2{ font-family:"JetBrains Mono", monospace; font-weight:700; font-size:22px; margin:0; }
+  .target-file{ font-family:"JetBrains Mono", monospace; font-size:13px; color:var(--ink-dim); margin:0 0 16px; }
 
-  .step{ margin:30px 0; }
-  .step-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .step-num{
-    font-family:"JetBrains Mono", monospace; font-weight:700; font-size:13px;
-    width:26px; height:26px; border-radius:50%; flex-shrink:0;
-    background:var(--accent); color:var(--surface);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .step-head h3{ font-size:18px; font-weight:700; margin:0; }
-  .step-body{ padding-left:36px; }
-  .step-body p{ margin:0 0 12px; font-size:15px; }
-  .step-body ul, .step-body ol{ margin:0 0 12px; padding-left:22px; font-size:15px; }
-  .step-body li{ margin-bottom:5px; }
+  ol.steps{ margin:0 0 16px; padding-left:22px; font-size:14.5px; }
+  ol.steps li{ margin-bottom:7px; }
+  ol.steps li b{ color:var(--ink); }
 
   pre{
-    background:var(--code-bg); color:var(--code-ink); border-radius:10px;
-    padding:16px 18px; overflow-x:auto; font-family:"JetBrains Mono", monospace;
-    font-size:13px; line-height:1.65; margin:0 0 14px; border:1px solid var(--border);
+    background:var(--code-bg); color:var(--code-ink); border-radius:8px; padding:12px 14px;
+    overflow-x:auto; font-family:"JetBrains Mono", monospace; font-size:12.5px; line-height:1.55;
+    margin:8px 0 12px; border:1px solid var(--border);
   }
   code{ font-family:"JetBrains Mono", monospace; font-size:0.92em; }
-  p code, li code, td code{ background:var(--surface-2); padding:1px 6px; border-radius:4px; color:var(--accent2); }
+  p code, li code, td code{ background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--accent2); }
 
-  .callout{ border-radius:10px; padding:14px 18px; margin:16px 0; border:1px solid var(--border); font-size:14px; }
-  .callout.tip{ background:var(--accent2-soft); border-color:color-mix(in srgb, var(--accent2) 35%, var(--border)); }
-  .callout.warn{ background:var(--danger-soft); border-color:color-mix(in srgb, var(--danger) 35%, var(--border)); }
-  .callout.good{ background:var(--good-soft); border-color:color-mix(in srgb, var(--good) 35%, var(--border)); }
-  .callout-label{
-    font-family:"JetBrains Mono", monospace; font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; font-weight:700; margin-bottom:6px; display:block;
-  }
-  .callout.tip .callout-label{ color:var(--accent2); }
-  .callout.warn .callout-label{ color:var(--danger); }
-  .callout.good .callout-label{ color:var(--good); }
-  .callout p{ margin:0; }
-  .callout p + p{ margin-top:8px; }
+  .note{ border-radius:8px; padding:10px 14px; margin:10px 0; border:1px solid var(--border); font-size:13px; }
+  .note.warn{ background:var(--danger-soft); border-color:color-mix(in srgb, var(--danger) 35%, var(--border)); }
+  .note.tip{ background:var(--accent2-soft); border-color:color-mix(in srgb, var(--accent2) 35%, var(--border)); }
+  .note b{ color:var(--ink); }
 
   table{
-    width:100%; border-collapse:collapse; margin:14px 0 18px; font-size:13.5px;
-    background:var(--surface); border-radius:10px; overflow:hidden; border:1px solid var(--border);
+    width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:13px;
+    background:var(--surface); border-radius:8px; overflow:hidden; border:1px solid var(--border);
   }
-  th, td{ padding:9px 12px; text-align:left; border-bottom:1px solid var(--border); }
-  th{
-    font-family:"JetBrains Mono", monospace; font-size:11px; letter-spacing:.05em;
-    text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
-  }
+  th, td{ padding:7px 10px; text-align:left; border-bottom:1px solid var(--border); }
+  th{ font-family:"JetBrains Mono", monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2); }
   tr:last-child td{ border-bottom:none; }
   td.mono, th.mono{ font-family:"JetBrains Mono", monospace; }
   .before{ color:var(--danger); }
   .after{ color:var(--good); font-weight:600; }
   .table-wrap{ overflow-x:auto; }
 
-  .answer-box{ background:var(--surface); border:2px solid var(--good); border-radius:10px; padding:16px 18px; margin:16px 0; }
-  .answer-box .callout-label{ color:var(--good); }
-  .answer-box .hex{ font-family:"JetBrains Mono", monospace; font-size:13px; color:var(--ink); word-break:break-all; margin-top:6px; }
+  .answer-box{ background:var(--surface); border:2px solid var(--good); border-radius:8px; padding:12px 14px; margin:10px 0; }
+  .answer-box .lbl{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--good); font-weight:700; display:block; margin-bottom:4px; }
+  .answer-box .hex{ font-family:"JetBrains Mono", monospace; font-size:12.5px; color:var(--ink); word-break:break-all; }
 
-  .sect-h{ font-family:"JetBrains Mono",monospace; font-size:22px; margin-top:70px; }
+  .sect-h{ font-family:'JetBrains Mono',monospace; font-size:20px; margin-top:52px; }
 
   footer{
-    margin-top:80px; padding-top:20px; border-top:1px solid var(--border);
+    margin-top:60px; padding-top:18px; border-top:1px solid var(--border);
     display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
-    font-family:"JetBrains Mono", monospace; font-size:11.5px; color:var(--ink-faint);
+    font-family:"JetBrains Mono", monospace; font-size:11px; color:var(--ink-faint);
   }
 
-  @media (max-width:840px){
+  @media (max-width:820px){
     .shell{ grid-template-columns:1fr; }
     .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--border); }
-    .main{ padding:36px 20px 80px; }
+    .main{ padding:32px 18px 70px; }
     .grid6{ grid-template-columns:1fr 1fr; }
   }
 </style>
@@ -207,14 +157,11 @@
 <body>
 <div class="shell">
 
-  <!-- ============ SIDEBAR ============ -->
   <nav class="sidebar">
     <div class="side-title">OPERATION <span>AEGIS</span></div>
     <div class="side-sub mono">CP423322 · Lab 09</div>
     <div class="side-nav">
       <a href="#top"><span class="n">·</span> Overview</a>
-      <a href="#prep"><span class="n">·</span> Prep Tools</a>
-      <div class="sep"></div>
       <a href="#ch1"><span class="n">1</span> Anti Capture</a>
       <a href="#ch2"><span class="n">2</span> Anti Packing</a>
       <a href="#ch3"><span class="n">3</span> Anti Reverse</a>
@@ -226,681 +173,176 @@
     </div>
   </nav>
 
-  <!-- ============ MAIN ============ -->
   <main class="main" id="top">
 
-    <div class="eyebrow">CP423322 · Malware Analysis &amp; Protection · Lab 09</div>
-    <h1>Operation <span>AEGIS</span> — Full Bypass Walkthrough</h1>
-    <p class="lede">
-      คู่มือทำตามได้เองแบบละเอียด สำหรับ Anti-Analysis 6 challenge ครบทุกข้อ
-      ครอบคลุมตั้งแต่ triage ด้วย DIE, วิเคราะห์ logic ด้วย Ghidra, ไปจนถึงขั้นตอน patch จริงด้วย x64dbg
-      พร้อมค่า offset/hex ที่ตรวจสอบแล้วจากไฟล์ชุดเดียวกับที่ใช้ในแล็บ
-    </p>
+    <div class="eyebrow">CP423322 · Lab 09</div>
+    <h1>Operation <span>AEGIS</span> — Quick Bypass Steps</h1>
+    <p class="lede">ขั้นตอน patch แบบเร็ว ใช้ Ghidra เพียงตัวเดียว (Symbol Tree filter หา function → Patch Instruction แก้ตรง ๆ ใน GUI)</p>
     <div class="meta-row">
-      <span class="chip">เครื่องมือ <b>DIE · Ghidra · x64dbg</b></span>
+      <span class="chip">เครื่องมือ <b>Ghidra</b></span>
       <span class="chip">แพลตฟอร์ม <b>Windows x64</b></span>
-      <span class="chip">Compiler เป้าหมาย <b>MinGW GCC</b></span>
-      <span class="chip">ผลลัพธ์ <b>6/6 Solved</b></span>
+      <span class="chip">6/6 Solved</span>
     </div>
 
     <div class="grid6">
-      <a href="#ch1"><span class="gnum mono">01</span><span class="gname">Anti Capture</span><span class="gtag mono">1-byte patch</span></a>
-      <a href="#ch2"><span class="gnum mono">02</span><span class="gname">Anti Packing</span><span class="gtag mono">unpack + 4-point gate</span></a>
-      <a href="#ch3"><span class="gnum mono">03</span><span class="gname">Anti Reverse</span><span class="gtag mono">no patch needed</span></a>
-      <a href="#ch4"><span class="gnum mono">04</span><span class="gname">Anti Temper</span><span class="gtag mono">4-point gate</span></a>
-      <a href="#ch5"><span class="gnum mono">05</span><span class="gname">ClockCheck</span><span class="gtag mono">data byte fix</span></a>
-      <a href="#ch6"><span class="gnum mono">06</span><span class="gname">VBoxDetection</span><span class="gtag mono">4-point gate</span></a>
+      <a href="#ch1"><span class="gnum mono">01</span><span class="gname">Anti Capture</span><span class="gtag mono">1 jump</span></a>
+      <a href="#ch2"><span class="gnum mono">02</span><span class="gname">Anti Packing</span><span class="gtag mono">unpack + 4 jump</span></a>
+      <a href="#ch3"><span class="gnum mono">03</span><span class="gname">Anti Reverse</span><span class="gtag mono">no patch</span></a>
+      <a href="#ch4"><span class="gnum mono">04</span><span class="gname">Anti Temper</span><span class="gtag mono">4 jump</span></a>
+      <a href="#ch5"><span class="gnum mono">05</span><span class="gname">ClockCheck</span><span class="gtag mono">1 byte data</span></a>
+      <a href="#ch6"><span class="gnum mono">06</span><span class="gname">VBoxDetection</span><span class="gtag mono">4 jump</span></a>
     </div>
 
-    <!-- ============ PREP ============ -->
-    <h2 id="prep" class="sect-h" style="margin-top:0;">เตรียมเครื่องมือก่อนเริ่ม</h2>
-    <div class="step-body" style="padding-left:0;">
-      <p>ติดตั้งผ่าน winget (รันใน PowerShell as Administrator):</p>
-      <pre>winget install horsicq.DIE-engine
-winget install UPX.UPX</pre>
-      <p>Ghidra: ดาวน์โหลดจาก <code>ghidra-sre.org</code> แตกไฟล์ แล้วรัน <code>ghidraRun.bat</code></p>
-      <p>x64dbg: ดาวน์โหลดจาก <code>x64dbg.com</code> — ใช้ตัว <code>x64dbg.exe</code> สำหรับไฟล์ 64-bit</p>
-      <div class="callout warn">
-        <span class="callout-label">สำคัญ</span>
-        <p>ทำงานในไฟล์ <b>สำเนา</b> เสมอ ห้ามแก้ไฟล์ต้นฉบับตรง ๆ — copy ไฟล์แล้วตั้งชื่อใหม่ เช่น <code>AntiCapture_patched.exe</code> ก่อน patch ทุกครั้ง</p>
-      </div>
-      <div class="callout tip">
-        <span class="callout-label">แพทเทิร์นรวมของทั้ง 6 ข้อ</span>
-        <p>ทุก challenge ใช้โครง: <code>custom_anti_analysis_check()</code> เช็คสภาพแวดล้อม → return "key" 16 ตัวอักษร →
-        ส่งเข้า <code>drop_encrypted_file()</code> ที่ XOR-decode ด้วย <code>0x1F</code> แล้วเช็คว่า 4 ตัวท้ายเป็น
-        <code>A J K P</code> ก่อนจะ AES-decrypt payload จริง — เข้าใจโครงนี้ครั้งเดียว ไล่ทุกข้อได้เร็วขึ้นมาก</p>
-      </div>
+    <div class="note tip">
+      <b>วิธี patch ใน Ghidra (ใช้ซ้ำทุกข้อ):</b> คลิกขวาที่ instruction ใน Listing → <b>Patch Instruction</b> → พิมพ์คำสั่งใหม่ (เช่น <code>NOP</code> หรือ <code>JMP 0x...</code>) → Enter →
+      เสร็จแล้ว <b>File → Export Program</b> → format เดิม (PE) → ตั้งชื่อไฟล์ใหม่แล้ว save
+    </div>
+    <div class="note tip">
+      <b>วิธีหา function เร็ว:</b> panel ซ้าย → ขยาย <b>Functions</b> → ช่อง <b>Filter</b> ด้านล่าง พิมพ์ชื่อฟังก์ชัน → double-click ผลลัพธ์
     </div>
 
-    <!-- ============ CHALLENGE 1 ============ -->
+    <!-- ============ CH1 ============ -->
     <div class="challenge-head" id="ch1">
-      <span class="challenge-num">CH.1</span>
-      <h2>Anti Capture</h2>
+      <span class="challenge-num">CH.1</span><h2>Anti Capture</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>Anti_Capture.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW (GCC 15.1.0)</pre>
-        <p>ไม่ได้ pack — ไปวิเคราะห์ต่อด้วย Ghidra ได้เลย</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>เปิดใน Ghidra แล้ว auto-analyze</h3></div>
-      <div class="step-body">
-        <p><code>File → Import File</code> เลือก <code>Anti_Capture.exe</code> → ลาก icon ลงหน้าต่างโปรเจกต์ → double-click เปิด CodeBrowser →
-        กด <b>Yes</b> ตอนถามว่า analyze ไหม → ปล่อยค่า default แล้วกด <b>Analyze</b> (รอ ~10-20 วินาที)</p>
-      </div>
+    <p class="target-file"><code>Anti_Capture.exe</code></p>
+    <ol class="steps">
+      <li>DIE → PE64, MinGW, ไม่ pack</li>
+      <li>Ghidra import → analyze → Filter หา <code>custom_anti_analysis_check</code> → เปิด</li>
+      <li>อ่านโค้ด: เช็คไฟล์ <code>npcap.sys</code> 2 รอบติด — key จริงอยู่ path ที่แทบไม่ถึงตามธรรมชาติ</li>
+      <li><b>ก่อน patch:</b> ต้องมี Npcap ติดตั้งจริง (เปิด <code>Wireshark</code> ติดตั้งแล้ว หรือรัน <code>sc query npcap</code> ต้องเห็น RUNNING)</li>
+      <li>คลิกบรรทัด <code>if (pFVar1 == NULL) { return "4566..." }</code> ใน Decompile → Listing เลื่อนไปจุดเดียวกัน</li>
+      <li>หา <code>JZ</code> ตรงนั้น → คลิกขวา → <b>Patch Instruction</b> → พิมพ์ <code>JMP</code> ตามด้วย address ปลายทางเดิม → Enter</li>
+      <li><b>File → Export Program</b> → save เป็น <code>AntiCapture_patched.exe</code></li>
+      <li>รันไฟล์ → เห็น <b>Answer</b></li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">Answer</span>
+      <div class="hex">Final Key (hex): 2b 2a 29 29 2a 2b 2c 2d 2c 2d 2c 2d 2c 2b 5e 55 54 4f</div>
     </div>
 
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>หา string ที่น่าสงสัย</h3></div>
-      <div class="step-body">
-        <p><code>Window → Defined Strings</code> แล้วค้นหาคำว่า <code>npcap</code> จะเจอ:</p>
-        <pre>C:\Windows\System32\drivers\npcap.sys
-Install Network Capture Tool!</pre>
-        <p>Double-click string แรก → กด <code>Ctrl+Shift+F</code> (Show References To) จะพาไปฟังก์ชันที่เรียกใช้ ชื่อ
-        <code>custom_anti_analysis_check</code></p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>อ่าน logic (Decompile window)</h3></div>
-      <div class="step-body">
-        <p>เปิด Decompile panel (<code>Window → Decompile</code>) จะเห็นโค้ดประมาณนี้:</p>
-        <pre>char * custom_anti_analysis_check(void)
-{
-  FILE *pFVar1;
-  pFVar1 = fopen("...npcap.sys","r");
-  if (pFVar1 == NULL) {
-    MessageBoxA(0,"Install Network Capture Tool!",...);   // decoy #1
-  } else {
-    fclose(pFVar1);
-    pFVar1 = fopen("...npcap.sys","r");        // เปิดไฟล์เดิมซ้ำรอบสอง!
-    if (pFVar1 == NULL) {
-      return "456654321234AJKP";               // ← key จริง (แทบเป็นไปไม่ได้ที่จะมาถึงตรงนี้)
-    }
-    fclose(pFVar1);
-    MessageBoxA(0,"...Shark...",...);           // decoy #2
-  }
-  return "notme12345678912";
-}</pre>
-        <div class="callout tip">
-          <span class="callout-label">อ่านเกมให้ออก</span>
-          <p>โปรแกรมเปิดไฟล์เดิมสองรอบติดกัน โดยหวังว่ารอบสองจะสำเร็จเสมอ (เพราะไฟล์ยังอยู่) — ทำให้ path ที่ return key จริง
-          แทบไม่มีทางถูก trigger ตามธรรมชาติ ต้อง <b>บังคับให้เข้า path นั้นด้วยการ patch</b></p>
-        </div>
-        <div class="callout warn">
-          <span class="callout-label">Prerequisite</span>
-          <p>เงื่อนไข <code>if (pFVar1 == NULL)</code> แรกสุดต้องการให้ <b>เจอไฟล์ npcap.sys จริง</b> — เช็คก่อนว่าเครื่องคุณลง Npcap
-          (ตัวติดตั้งมากับ Wireshark) แล้ว ด้วยคำสั่ง <code>sc query npcap</code> ต้องเห็น <code>STATE: RUNNING</code></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>หาตำแหน่ง jump ที่ต้อง patch (Listing window)</h3></div>
-      <div class="step-body">
-        <p>คลิกที่บรรทัด <code>if (pFVar1 == NULL) { return "45665..." }</code> ใน decompile panel — Listing panel (แสดง assembly)
-        จะกระโดดไปตำแหน่งที่ตรงกัน หา instruction:</p>
-        <pre>1400014ae    74 36    JZ  0x1400014e6</pre>
-        <p>นี่คือจุดตัดสินใจ: ถ้าผลลัพธ์การเปิดไฟล์รอบสองเป็น <code>NULL</code> (ZF=1) → กระโดดไป return key จริง
-        เราจะบังคับให้ "กระโดดเสมอ" ไม่สนใจผลลัพธ์</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">6</span><h3>Patch ด้วย x64dbg</h3></div>
-      <div class="step-body">
-        <ol>
-          <li>เปิด x64dbg → <code>File → Open</code> เลือกไฟล์ <b>สำเนา</b> ของคุณ (เช่น <code>AntiCapture_patched.exe</code>)</li>
-          <li>กด <code>Ctrl+G</code> (Go to Expression) พิมพ์ <code>1400014AE</code> กด Enter</li>
-          <li>คลิกขวาที่บรรทัดนั้น (จะเห็น <code>je AntiCapture.1400014E6</code>) → <b>Assemble</b> (หรือกด Space)</li>
-          <li>พิมพ์ <code>jmp 1400014E6</code> แทนที่ (ปลายทางเดิม แค่เปลี่ยนจาก conditional เป็น unconditional) → กด OK</li>
-          <li>คลิกขวาที่หน้าต่าง CPU → <b>Patches</b> (หรือ <code>Alt+P</code>) → เลือก patch ที่เพิ่งทำ → <b>Save File</b> เพื่อเขียนกลับลงไฟล์จริง</li>
-        </ol>
-        <div class="callout tip">
-          <span class="callout-label">ทางเลือก: hex editor</span>
-          <p>ถ้าไม่อยากใช้ x64dbg เปิดไฟล์ด้วย hex editor (เช่น HxD) แล้วกด <code>Ctrl+G</code> ไปที่ <b>file offset</b>
-          <code>0xAAE</code> (ไม่ใช่ VA) จะเห็น byte <code>74 36</code> — เปลี่ยนเป็น <code>EB 36</code> แล้ว save</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">7</span><h3>ทดสอบ</h3></div>
-      <div class="step-body">
-        <p>double-click ไฟล์ที่ patch แล้ว ควรขึ้น MessageBox:</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้</span>
-          <div class="hex">Answer<br>Final Key (hex): 2b 2a 29 29 2a 2b 2c 2d 2c 2d 2c 2d 2c 2b 5e 55 54 4f</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ CHALLENGE 2 ============ -->
+    <!-- ============ CH2 ============ -->
     <div class="challenge-head" id="ch2">
-      <span class="challenge-num">CH.2</span>
-      <h2>Anti Packing</h2>
+      <span class="challenge-num">CH.2</span><h2>Anti Packing</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>Anti_Packing.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW
-Packer: UPX(5.02)[NRV, best]</pre>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>Unpack ด้วย UPX</h3></div>
-      <div class="step-body">
-        <pre>copy Anti_Packing.exe Anti_Packing_unpacked.exe
-upx -d Anti_Packing_unpacked.exe</pre>
-        <p>เป็น UPX มาตรฐาน ไม่มีการดัดแปลง signature จึง unpack ตรง ๆ ได้เลย ไม่ต้องหา OEP เอง</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>เปิดไฟล์ที่ unpack แล้วใน Ghidra วิเคราะห์</h3></div>
-      <div class="step-body">
-        <p>Import <code>Anti_Packing_unpacked.exe</code> เข้า Ghidra → analyze → หา string <code>"I love packing"</code> หรือ
-        <code>"thisisnotpacked"</code> ใน Defined Strings → ตามไปที่ฟังก์ชัน <code>custom_anti_analysis_check</code></p>
-        <pre>char * custom_anti_analysis_check(void)
-{
-  ... อ่าน section header แรกของไฟล์ตัวเอง ...
-  if (ชื่อ section == "UPX0" หรือ "UPX1") {
-      MessageBoxA(...,"I love packing, no one see my code",...);
-  } else {
-      MessageBoxA(...,"You unpacking me! ... I don't like it",...);
-  }
-  return "thisisnotpacked";   // ← เหมือนกันทั้งสอง path!
-}</pre>
-        <div class="callout tip">
-          <span class="callout-label">จุดสำคัญ</span>
-          <p>ข้อความ MessageBox ต่างกัน แต่ <b>ค่าที่ return เหมือนกันทุกกรณี</b> — เป็นแค่ของหลอกล่อ ไม่ต้องสนใจว่า pack หรือไม่</p>
-        </div>
-      </div>
+    <p class="target-file"><code>Anti_Packing.exe</code></p>
+    <ol class="steps">
+      <li>DIE → Packed UPX 5.02</li>
+      <li>cmd: <code>copy Anti_Packing.exe Anti_Packing_unpacked.exe</code> → <code>upx -d Anti_Packing_unpacked.exe</code></li>
+      <li>Ghidra import ไฟล์ที่ unpack แล้ว → analyze → Filter หา <code>drop_encrypted_file</code> → เปิด</li>
+      <li>เลื่อนหาบล็อก <code>if (local_38[15]=='O' && local_38[14]=='T' && local_38[13]=='U' && local_38[12]=='^')</code></li>
+      <li>คลิกบรรทัดนั้นให้ Listing เลื่อนตาม จะเจอ 4 jump ติดกัน:</li>
+    </ol>
+    <div class="table-wrap"><table>
+      <tr><th>Jump</th><th>Patch เป็น</th></tr>
+      <tr><td class="mono">JNZ (เช็ค byte[15])</td><td class="mono after">NOP</td></tr>
+      <tr><td class="mono">JNZ (เช็ค byte[14])</td><td class="mono after">NOP</td></tr>
+      <tr><td class="mono">JNZ (เช็ค byte[13])</td><td class="mono after">NOP</td></tr>
+      <tr><td class="mono">JZ (เช็ค byte[12])</td><td class="mono after">JMP &lt;ปลายทางเดิม&gt;</td></tr>
+    </table></div>
+    <ol class="steps" start="6">
+      <li>Patch ทั้ง 4 จุด (คลิกขวาแต่ละบรรทัด → Patch Instruction) → <b>File → Export Program</b> → save เป็น <code>Anti_Packing_patched.exe</code></li>
+      <li>รัน → เห็น <b>Answer</b></li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">Answer</span>
+      <div class="hex">Final Key (hex): 6b 77 76 6c 76 6c 71 70 6b 6f 7e 7c 74 7a 7b 1f</div>
     </div>
 
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>ดูว่าทำไม key นี้ยังไม่ผ่าน — เปิดฟังก์ชัน drop_encrypted_file</h3></div>
-      <div class="step-body">
-        <p>จาก <code>WinMain</code> จะเห็นว่า key ที่ได้ถูกส่งต่อไปยัง <code>drop_encrypted_file(key, ...)</code> — เปิดฟังก์ชันนี้ดู:</p>
-        <pre>for (i=0; i<16; i++) local_38[i] = key[i] ^ 0x1F;   // decode ทีละ byte
-
-if (local_38[15]=='O' && local_38[14]=='T' &&
-    local_38[13]=='U' && local_38[12]=='^') {
-    // ผ่าน → โชว์ Answer + AES decrypt ต่อ
-} else {
-    MessageBoxA(...,"Detection Triggered!",...);
-}</pre>
-        <p>ถอดสมการ: byte ตำแหน่ง 12-15 (นับจาก 0) ของ key ต้อง decode ได้เป็น <code>A J K P</code> พอดี — แต่
-        <code>"thisisnotpacked"</code> มีแค่ 15 ตัวอักษร (ตำแหน่ง 12-14 = <code>k,e,d</code>) จึง<b>ไม่มีทางผ่านได้เลยจากโค้ดต้นฉบับ</b></p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>หาตำแหน่ง 4 jump ที่ต้อง patch</h3></div>
-      <div class="step-body">
-        <p>ใน Listing panel ของ <code>drop_encrypted_file</code> ไล่หาบล็อกเปรียบเทียบ 4 ครั้งติดกัน (คลิกจากบรรทัด compare ใน decompile
-        panel เพื่อกระโดดไปที่ assembly ตรงจุด):</p>
-        <div class="table-wrap">
-        <table>
-          <tr><th>Instruction</th><th class="mono">Before</th><th class="mono">After</th><th>เหตุผล</th></tr>
-          <tr><td class="mono">JNZ (เช็ค byte[15]=='O')</td><td class="mono before">75 21</td><td class="mono after">90 90</td><td>NOP ทิ้ง ไม่ให้กระโดดไป fail</td></tr>
-          <tr><td class="mono">JNZ (เช็ค byte[14]=='T')</td><td class="mono before">75 16</td><td class="mono after">90 90</td><td>NOP ทิ้ง</td></tr>
-          <tr><td class="mono">JNZ (เช็ค byte[13]=='U')</td><td class="mono before">75 0B</td><td class="mono after">90 90</td><td>NOP ทิ้ง</td></tr>
-          <tr><td class="mono">JZ (เช็ค byte[12]=='^')</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td><td>เปลี่ยนเป็น JMP ไม่มีเงื่อนไข → เข้า success เสมอ</td></tr>
-        </table>
-        </div>
-        <div class="callout warn">
-          <span class="callout-label">ทำไม 4 จุด ไม่ใช่จุดเดียว</span>
-          <p>3 อันแรกเป็น <code>JNZ ...fail_label</code> — ถ้าไม่ patch แม้แต่อันเดียว โปรแกรมจะกระโดดไป fail ก่อนถึงจุดสุดท้าย
-          เพราะงั้นต้อง NOP ทั้ง 3 อันก่อน แล้วค่อยเปลี่ยนอันสุดท้ายเป็น JMP</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">6</span><h3>Patch ด้วย x64dbg (4 จุดรวด)</h3></div>
-      <div class="step-body">
-        <p>เปิด <code>Anti_Packing_patched.exe</code> (สำเนาของไฟล์ unpacked) ใน x64dbg แล้วทำซ้ำขั้นตอนนี้ 4 รอบ:</p>
-        <ol>
-          <li><code>Ctrl+G</code> ไปที่ address ของแต่ละ jump (ดูจาก Ghidra Listing ของคุณเอง — เลขอาจขยับจาก cheat sheet เล็กน้อยถ้า compile ต่างเวอร์ชัน)</li>
-          <li>3 จุดแรก: คลิกขวา → Assemble → พิมพ์ <code>nop</code> กด OK แล้วเลื่อนไปบรรทัดถัดไปในกลุ่มเดียวกัน พิมพ์ <code>nop</code> อีกที (JNZ ใช้ 2 byte = nop 2 ครั้ง หรือเลือกช่วง 2 byte แล้ว assemble รวดเดียวก็ได้)</li>
-          <li>จุดสุดท้าย (JZ): Assemble แล้วพิมพ์ <code>jmp &lt;ปลายทางเดิมที่เห็นในบรรทัด&gt;</code></li>
-          <li><code>Alt+P</code> → Save File เมื่อ patch ครบ 4 จุด</li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">7</span><h3>ทดสอบ</h3></div>
-      <div class="step-body">
-        <p>double-click ไฟล์ที่ patch แล้ว ควรขึ้น MessageBox:</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้</span>
-          <div class="hex">Answer<br>Final Key (hex): 6b 77 76 6c 76 6c 71 70 6b 6f 7e 7c 74 7a 7b 1f</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ CHALLENGE 3 ============ -->
+    <!-- ============ CH3 ============ -->
     <div class="challenge-head" id="ch3">
-      <span class="challenge-num">CH.3</span>
-      <h2>Anti Reverse</h2>
+      <span class="challenge-num">CH.3</span><h2>Anti Reverse</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>Anti_Reverse.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW (GCC 15.1.0)</pre>
-        <p>ไม่ได้ pack — ไปวิเคราะห์ต่อด้วย Ghidra ได้เลย เหมือน Challenge 1</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>วิเคราะห์ใน Ghidra</h3></div>
-      <div class="step-body">
-        <p>Import เข้า Ghidra → analyze → หา string <code>ghidra</code> ใน Defined Strings จะเจอ 3 ตัว:</p>
-        <pre>C:\ghidra_*
-C:\Program Files\ghidra_*
-%s\ghidra</pre>
-        <p>ตามไปที่ฟังก์ชันที่ใช้ — Ghidra ตั้งชื่อไว้ตลกดีว่า <code>is_payanak_installed</code></p>
-        <pre>undefined8 is_payanak_installed(void)
-{
-  FindFirstFileA("C:\\ghidra_*", ...);
-  if (ไม่เจอ) {
-    FindFirstFileA("C:\\Program Files\\ghidra_*", ...);
-    if (ไม่เจอ) {
-      // เช็คโฟลเดอร์ %APPDATA%\ghidra ด้วย GetFileAttributesA
-      if (เจอและเป็น directory) return 1;
-      return 0;
-    }
-    return 1;
-  }
-  return 1;
-}</pre>
-        <p>แล้วใน <code>custom_anti_analysis_check</code>:</p>
-        <pre>if (is_payanak_installed() == 0) {
-    return "852147852369AJKP";     // key จริง — ต่อเมื่อไม่พบ Ghidra เลยทั้ง 3 ที่
-} else {
-    MessageBoxA(...,"A normal user shouldn't have \"PAYANAK\"...",...);
-    return "notme12345678912";
-}</pre>
-      </div>
+    <p class="target-file"><code>Anti_Reverse.exe</code></p>
+    <ol class="steps">
+      <li>DIE → ไม่ pack</li>
+      <li>Ghidra → Filter หา <code>is_payanak_installed</code> → เช็ค 3 path: <code>C:\ghidra_*</code>, <code>C:\Program Files\ghidra_*</code>, <code>%APPDATA%\ghidra</code></li>
+      <li>ปิด Ghidra ให้สนิททุกหน้าต่าง</li>
+      <li>File Explorer → address bar พิมพ์ <code>%APPDATA%</code> → ลบโฟลเดอร์ <code>ghidra</code> ทิ้ง</li>
+      <li><b>ห้ามเปิด Ghidra ซ้ำก่อนรัน</b> — double-click <code>Anti_Reverse.exe</code> ตรง ๆ (ไม่ต้อง patch)</li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">Answer</span>
+      <div class="hex">Final Key (hex): 27 2a 2d 2e 2b 28 27 2a 2d 2c 29 26 5e 55 54 4f</div>
     </div>
 
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>เจอกับดัก — Ghidra ทิ้งร่องรอยของตัวเอง</h3></div>
-      <div class="step-body">
-        <p>Ghidra สร้างโฟลเดอร์ settings/log ไว้อัตโนมัติที่ <code>%APPDATA%\ghidra\</code> ทุกครั้งที่เปิดใช้งาน (ไม่ว่าจะ GUI หรือ headless)
-        — ตรงกับเงื่อนไขที่ 3 พอดี! เท่ากับว่า <b>การใช้ Ghidra วิเคราะห์ ทิ้งหลักฐานที่มัลแวร์ตรวจจับได้เอง</b></p>
-        <div class="callout warn">
-          <span class="callout-label">เช็คก่อนรัน</span>
-          <p>เปิด File Explorer ไปที่ <code>%APPDATA%\ghidra</code> (พิมพ์ address bar ได้เลย) — ถ้าเห็นโฟลเดอร์อยู่ แปลว่าจะโดนตรวจจับแน่นอน</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>วิธีแก้ — ลบร่องรอย ไม่ต้อง patch ไฟล์</h3></div>
-      <div class="step-body">
-        <ol>
-          <li>ปิด Ghidra ให้สนิท (ปิดทุกหน้าต่าง ไม่ใช่แค่ minimize)</li>
-          <li>เปิด File Explorer พิมพ์ <code>%APPDATA%</code> ที่ address bar กด Enter</li>
-          <li>ลบโฟลเดอร์ <code>ghidra</code> ทิ้งทั้งโฟลเดอร์ (คลิกขวา → Delete)</li>
-          <li><b>ห้ามเปิด Ghidra อีกก่อนรันไฟล์นี้</b> เพราะโฟลเดอร์จะถูกสร้างขึ้นมาใหม่ทันที</li>
-        </ol>
-        <div class="callout tip">
-          <span class="callout-label">ทำไมวิธีนี้ถึงถูกต้อง</span>
-          <p>ตรงกับธีมของ Challenge — "Anti-Reverse" คือการตรวจจับว่ามีเครื่องมือ RE อยู่ในเครื่องหรือไม่ การไม่ทิ้งร่องรอยเครื่องมือ RE
-          ไว้เลย คือทักษะการวิเคราะห์มัลแวร์ที่ถูกต้องอยู่แล้วในโลกจริง (ใช้เครื่องมือแบบ portable/ไม่ติดตั้ง หรือลบ log หลังใช้เสร็จ)</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>ทดสอบ</h3></div>
-      <div class="step-body">
-        <p>double-click <code>Anti_Reverse.exe</code> <b>ตัวต้นฉบับตรง ๆ</b> (ไม่ต้อง patch) ควรขึ้น MessageBox:</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้</span>
-          <div class="hex">Answer<br>Final Key (hex): 27 2a 2d 2e 2b 28 27 2a 2d 2c 29 26 5e 55 54 4f</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ CHALLENGE 4 ============ -->
+    <!-- ============ CH4 ============ -->
     <div class="challenge-head" id="ch4">
-      <span class="challenge-num">CH.4</span>
-      <h2>Anti Temper</h2>
+      <span class="challenge-num">CH.4</span><h2>Anti Temper</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>Anti_Temper.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW (GCC 15.1.0)</pre>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>วิเคราะห์ custom_anti_analysis_check</h3></div>
-      <div class="step-body">
-        <p>เปิดใน Ghidra → analyze → ดูฟังก์ชัน <code>custom_anti_analysis_check</code>:</p>
-        <pre>GetModuleFileNameA(0, path, ...);       // เอา path ตัวเอง
-fopen(path, "rb");
-md5File(...);                            // คำนวณ MD5 ของไฟล์ตัวเอง
-fopen("WELCOME_TO_THE_DARKNESS.txt","r"); // เปิดไฟล์ hash ที่ฝังไว้ในแล็บ
-fread(...); hex_string_to_bytes(...);
-if (memcmp(md5_คำนวณ, md5_จากไฟล์, 16) == 0) {
-    return "PKJAA7A15A7AEF4A";           // "ผ่าน" self-check
-} else {
-    MessageBoxA(...,"i was hijacked, good people not doing this !",...);
-    return "notme12345678912";
-}</pre>
-        <p>ไฟล์ <code>WELCOME_TO_THE_DARKNESS.txt</code> ที่แถมมาในชุดโจทย์ มีค่า MD5 ของไฟล์ <code>Anti_Temper.exe</code>
-        <b>ต้นฉบับ (ไม่ถูกแก้)</b> ฝังไว้อยู่แล้ว — ถ้าไฟล์ยังไม่ถูกแก้เลย MD5 จะตรงกันเอง</p>
-      </div>
+    <p class="target-file"><code>Anti_Temper.exe</code></p>
+    <ol class="steps">
+      <li>DIE → ไม่ pack</li>
+      <li>Ghidra → Filter หา <code>custom_anti_analysis_check</code> — เช็ค MD5 ตัวเองเทียบกับ <code>WELCOME_TO_THE_DARKNESS.txt</code></li>
+      <li class="note-inline"><b>MD5 ตรงก็ยังไม่พอ</b> — key ที่ได้ไม่ลงท้าย AJKP อยู่ดี ต้องไป patch <code>drop_encrypted_file</code> แทน (เหมือน Ch.2 เป๊ะ)</li>
+      <li>Filter หา <code>drop_encrypted_file</code> → เปิด → หา 4 jump แบบเดียวกับ Ch.2</li>
+      <li>Patch: 3 <code>JNZ</code> → <code>NOP</code>, 1 <code>JZ</code> → <code>JMP &lt;ปลายทางเดิม&gt;</code></li>
+      <li><b>File → Export Program</b> → save เป็น <code>Anti_Temper_patched.exe</code> → รัน</li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">Answer</span>
+      <div class="hex">Final Key (hex): 71 70 6b 72 7a 2e 2d 2c 2b 2a 29 28 27 26 2e 2d</div>
     </div>
 
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>ทำไม MD5 ผ่าน ก็ยังไม่พอ</h3></div>
-      <div class="step-body">
-        <p>เปิดฟังก์ชัน <code>drop_encrypted_file</code> — เป็น gate check แบบเดียวกับ Challenge 2 เป๊ะ (เช็คว่า key ที่ decode แล้ว
-        ลงท้ายด้วย <code>AJKP</code>) แต่ <code>"PKJAA7A15A7AEF4A"</code> (key ที่ได้แม้ MD5 จะตรง) มีตัวอักษรตำแหน่ง 12-15 เป็น
-        <code>E,F,4,A</code> — ไม่ใช่ <code>A,J,K,P</code></p>
-        <div class="callout warn">
-          <span class="callout-label">สรุป</span>
-          <p>ต่อให้ไม่แก้ไฟล์เลยแม้แต่ byte เดียว (MD5 ตรง 100%) ก็ <b>ไม่มีทางผ่าน gate check ท้ายสุดได้อยู่ดี</b> —
-          เท่ากับ self-integrity check ทั้งหมดเป็นเพียงฉากหน้า จุดที่ต้อง patch จริงคือ <code>drop_encrypted_file</code>
-          <b>ไม่ใช่</b>ส่วนคำนวณ MD5</p>
-        </div>
-        <div class="callout good">
-          <span class="callout-label">ทำไมห้าม patch MD5 โดยตรง</span>
-          <p>ถ้าไปพยายามแก้ให้ MD5 "ตรง" หลังจาก patch โค้ดอื่น จะวนลูปไม่จบ (แก้ไฟล์ → MD5 เปลี่ยน → ต้องแก้ hash ที่ฝังไว้ → แต่ hash
-          มาจากไฟล์ .txt แยกต่างหาก ไม่ใช่ใน .exe) วิธีที่ถูกต้องคือ patch จุด <b>compare ผลลัพธ์สุดท้าย</b> ใน
-          <code>drop_encrypted_file</code> แทน ให้ self-check ทั้งกระบวนก่อนหน้าไม่มีผลอะไรเลย</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>หาตำแหน่ง 4 jump ใน drop_encrypted_file</h3></div>
-      <div class="step-body">
-        <p>วิธีหาเหมือน Challenge 2 เป๊ะ — ไล่จาก decompile panel ไปยัง assembly ของบล็อก <code>if (byte[15]=='O' && ...)</code>
-        จะเจอ 4 instruction ติดกัน (3 JNZ + 1 JZ)</p>
-        <div class="table-wrap">
-        <table>
-          <tr><th>Instruction</th><th class="mono">Before</th><th class="mono">After</th></tr>
-          <tr><td class="mono">JNZ (byte[15]=='O')</td><td class="mono before">75 21</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JNZ (byte[14]=='T')</td><td class="mono before">75 16</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JNZ (byte[13]=='U')</td><td class="mono before">75 0B</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JZ (byte[12]=='^')</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td></tr>
-        </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>Patch ด้วย x64dbg</h3></div>
-      <div class="step-body">
-        <p>ขั้นตอนเหมือน Challenge 2 ทุกอย่าง — เปิดสำเนา <code>Anti_Temper_patched.exe</code> ใน x64dbg, <code>Ctrl+G</code> ไปที่แต่ละ
-        address, Assemble เปลี่ยน <code>jnz</code> เป็น <code>nop</code> (3 จุด) แล้วเปลี่ยน <code>jz</code> เป็น <code>jmp</code>
-        (1 จุด), จบด้วย <code>Alt+P → Save File</code></p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">6</span><h3>ทดสอบ</h3></div>
-      <div class="step-body">
-        <p>double-click ไฟล์ที่ patch แล้ว — ไม่ต้องสนใจว่า MD5 จะตรงหรือไม่ (ไม่เกี่ยวแล้ว) ควรขึ้น:</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้</span>
-          <div class="hex">Answer<br>Final Key (hex): 71 70 6b 72 7a 2e 2d 2c 2b 2a 29 28 27 26 2e 2d</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ CHALLENGE 5 ============ -->
+    <!-- ============ CH5 ============ -->
     <div class="challenge-head" id="ch5">
-      <span class="challenge-num">CH.5</span>
-      <h2>ClockCheck</h2>
+      <span class="challenge-num">CH.5</span><h2>ClockCheck</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>ClockCheck.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW (GCC 15.1.0)</pre>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>วิเคราะห์ timing check</h3></div>
-      <div class="step-body">
-        <p>เปิดใน Ghidra → <code>custom_anti_analysis_check</code>:</p>
-        <pre>DVar1 = GetTickCount();
-for (i = 0; i < 1000000; i++) { }        // ลูปเปล่า วัดความเร็ว
-DVar2 = GetTickCount();
-if (DVar2 - DVar1 < 100) {                // ถ้าลูปเร็ว (ไม่มี debugger คอย step)
-    DAT_140004002 = 0x57;                 // set byte ตัวที่ 3 เป็น 'W'
-}
-return &DAT_140004000;                    // return string 3 ตัวอักษร (+null)</pre>
-        <p>แล้วใน <code>extract_file_next</code> (ฟังก์ชันแทน <code>drop_encrypted_file</code> ของข้ออื่น):</p>
-        <pre>for (i=0; i<3; i++) local_24[i] = param_1[i] ^ 0x1F;   // decode ทีละ byte
-local_24[3] = 0;
-if (strcmp(local_24, "O+H") == 0) {
-    // decrypt AES แล้วเขียน flag.txt + โชว์ "Congratulations!"
-} else {
-    MessageBoxA(...,"Detection Triggered!",...);
-}</pre>
-      </div>
+    <p class="target-file"><code>ClockCheck.exe</code></p>
+    <ol class="steps">
+      <li>DIE → ไม่ pack</li>
+      <li>Ghidra → Filter <code>custom_anti_analysis_check</code> — วนลูป 1,000,000 รอบวัดเวลา ถ้าเร็ว set byte ที่ 3 เป็น <code>0x57</code></li>
+      <li>Filter <code>extract_file_next</code> — เช็คว่า 3 byte XOR 0x1F แล้ว decode ได้ <code>"O+H"</code></li>
+      <li>คำนวณ byte ต้นฉบับที่ต้องมี: <code>50 34 57</code> (P, 4, W)</li>
+      <li>หาตำแหน่ง <code>DAT_140004000</code> ใน Listing → เปิด hex editor (เช่น HxD) ที่ไฟล์สำเนา → ไปที่ file offset <code>0x3601</code> → เช็คว่าเป็น <code>58</code> จริงไหม → เปลี่ยนเป็น <code>34</code> → save</li>
+      <li class="note-inline"><b>ไม่ต้อง patch jump เลย</b> — แค่แก้ data byte ตัวนี้ timing check เดิมทำงานถูกอยู่แล้ว</li>
+      <li>รัน → MessageBox "Congratulations!" → เปิด <code>flag.txt</code> ต้อง<b>อ่านออก</b> (ถ้าอ่านไม่ออก = key ยังผิด)</li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">flag.txt</span>
+      <div class="hex">hack me at 127.0.0.1</div>
     </div>
 
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>ถอดสมการหา key ที่ถูกต้อง</h3></div>
-      <div class="step-body">
-        <p>ต้องการ <code>decode == "O+H"</code> → ย้อนกลับ (XOR ด้วย 0x1F อีกที) หาค่า byte ต้นฉบับที่ต้องมี:</p>
-        <div class="table-wrap">
-        <table>
-          <tr><th>ตำแหน่ง</th><th>ต้อง decode เป็น</th><th>ต้นฉบับต้องเป็น</th></tr>
-          <tr><td>DAT_140004000</td><td class="mono">'O' (0x4F)</td><td class="mono">'P' (0x50)</td></tr>
-          <tr><td>DAT_140004001</td><td class="mono">'+' (0x2B)</td><td class="mono">'4' (0x34)</td></tr>
-          <tr><td>DAT_140004002</td><td class="mono">'H' (0x48)</td><td class="mono">'W' (0x57)</td></tr>
-        </table>
-        </div>
-        <p>สังเกตว่า byte ตัวที่ 3 (<code>'W'=0x57</code>) คือค่าที่ timing check ตั้งใจจะ set เวลาโปรแกรมรันเร็ว — ตรงกันพอดี
-        ปัญหาจึงไม่ได้อยู่ที่ timing เลย</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>ตรวจ byte จริงในไฟล์ — เจอบั๊ก</h3></div>
-      <div class="step-body">
-        <p>เปิดไฟล์ด้วย hex editor ไปที่ตำแหน่ง <code>DAT_140004000</code> (ดู VA จาก Ghidra แล้วแปลงเป็น file offset — ในไฟล์ชุดนี้
-        คือ <code>0x3600</code>) จะเห็น:</p>
-        <pre>offset 0x3600: 50 58 57 00
-                P  X  W  \0</pre>
-        <div class="callout warn">
-          <span class="callout-label">พบสาเหตุ</span>
-          <p>byte ตัวกลางเป็น <code>0x58 ('X')</code> แทนที่จะเป็น <code>0x34 ('4')</code> ตามที่ต้องการ — เป็น
-          <b>บั๊กที่ฝังอยู่ใน data ตรง ๆ ไม่เกี่ยวกับ timing check เลย</b> ต่อให้รันเร็วแค่ไหน ก็ไม่มีทางได้ <code>"O+H"</code>
-          ครบถูกต้อง เพราะ byte กลางผิดตั้งแต่ต้น</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>Patch data byte (ไม่ใช่ patch jump!)</h3></div>
-      <div class="step-body">
-        <p>เปิดไฟล์ <b>สำเนา</b> ด้วย hex editor (เช่น HxD) → <code>Ctrl+G</code> ไปที่ offset <code>0x3601</code> (byte ตัวกลาง)
-        → เปลี่ยนจาก <code>58</code> เป็น <code>34</code> → save</p>
-        <div class="table-wrap">
-        <table>
-          <tr><th>File Offset</th><th class="mono">Before</th><th class="mono">After</th></tr>
-          <tr><td class="mono">0x3601</td><td class="mono before">58</td><td class="mono after">34</td></tr>
-        </table>
-        </div>
-        <div class="callout tip">
-          <span class="callout-label">ไม่ต้อง patch jump เลย</span>
-          <p>เพราะ timing check เดิมทำงานถูกต้องอยู่แล้ว (ตราบใดที่รันแบบปกติไม่มี debugger) แค่แก้ byte ที่ผิดตัวเดียว
-          โปรแกรมก็จะผ่านเงื่อนไข <code>strcmp</code> ได้เองตามธรรมชาติ — ไม่ต้อง bypass อะไรเพิ่ม</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">6</span><h3>ทดสอบ — และวิธีเช็คว่า "ถูกจริง" หรือแค่ "ผ่านการเช็ค"</h3></div>
-      <div class="step-body">
-        <p>double-click ไฟล์ที่ patch แล้ว จะขึ้น MessageBox <b>"Congratulations! Payload decrypted and flag.txt created!"</b>
-        (ไม่ใช่ "Answer / Final Key hex" แบบข้ออื่น — ไฟล์นี้ออกแบบต่าง) แล้วเปิด <code>flag.txt</code> ที่ถูกสร้างขึ้นในโฟลเดอร์เดียวกัน</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้ (flag.txt)</span>
-          <div class="hex">hack me at 127.0.0.1</div>
-        </div>
-        <div class="callout warn">
-          <span class="callout-label">ข้อควรระวังสำคัญ</span>
-          <p>ถ้าลอง "บังคับ" ให้ผ่านด้วยการ patch jump (NOP เงื่อนไข strcmp) แทนที่จะแก้ data byte — โปรแกรมจะเขียน
-          <code>flag.txt</code> ออกมาจริง แต่เนื้อหาข้างในจะเป็น<b>ตัวอักษรมั่ว ๆ อ่านไม่ออก</b> เพราะ AES key ที่ใช้ถอดรหัสยังผิดอยู่
-          (มาจาก key ที่ไม่ถูกต้อง) — ต้อง <b>เปิดดูเนื้อหา flag.txt เสมอ</b> เพื่อยืนยันว่า decrypt ถูกต้องจริง ไม่ใช่แค่ผ่าน
-          message box เฉย ๆ</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ============ CHALLENGE 6 ============ -->
+    <!-- ============ CH6 ============ -->
     <div class="challenge-head" id="ch6">
-      <span class="challenge-num">CH.6</span>
-      <h2>VBoxDetection</h2>
+      <span class="challenge-num">CH.6</span><h2>VBoxDetection</h2>
     </div>
-    <p class="target-file">เป้าหมาย: <code>VBoxDetection.exe</code></p>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span><h3>Triage ด้วย DIE</h3></div>
-      <div class="step-body">
-        <pre>PE64
-Compiler: MinGW (GCC 15.1.0)</pre>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span><h3>วิเคราะห์ custom_anti_analysis_check</h3></div>
-      <div class="step-body">
-        <pre>LVar1 = RegOpenKeyExA(HKLM, "SOFTWARE\Oracle\VirtualBox Guest Additions", ...);
-if (LVar1 == 0) {                          // key นี้ต้อง "มี"
-    RegCloseKey(...);
-    LVar1 = RegOpenKeyExA(HKLM, "HARDWARE\ACPI\DSDT\VBOX__", ...);
-    if (LVar1 != 0) {                      // key นี้ต้อง "ไม่มี"
-        bembo4fu("ABDDABXE2345AJKP");       // decode แล้ว return key จริง
-        return ...;
-    }
-    MessageBoxA(...,"You must run this program in PC!",...);
-} else {
-    MessageBoxA(...,"You must run this program in VirtualBox!",...);
-}
-return "notme12345678912";</pre>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">3</span><h3>ทำไมเงื่อนไขนี้เป็นไปไม่ได้ในทางปฏิบัติ</h3></div>
-      <div class="step-body">
-        <p>เปิด <code>regedit</code> เช็คทั้งสอง key เอง:</p>
-        <pre>HKEY_LOCAL_MACHINE\SOFTWARE\Oracle\VirtualBox Guest Additions
-HKEY_LOCAL_MACHINE\HARDWARE\ACPI\DSDT\VBOX__</pre>
-        <div class="callout warn">
-          <span class="callout-label">ข้อขัดแย้ง</span>
-          <p>ถ้าเครื่องที่ใช้ทำแล็บรันอยู่บน VirtualBox จริง (ตามที่โจทย์กำหนดให้ทำ + ลง Guest Additions ไว้เสมอ) —
-          key แรกจะ<b>มีแน่นอน</b> (เพราะลง Guest Additions ไว้) แต่ key ที่สองก็จะ<b>มีด้วย</b> (เพราะเป็น VirtualBox จริง ๆ)
-          ซึ่งขัดกับเงื่อนไขที่ต้องการ (ต้องไม่มี) — เท่ากับว่า<b>ไม่มีทางผ่านได้ตามธรรมชาติเลย ไม่ว่าจะตั้งค่าเครื่องยังไง</b></p>
-        </div>
-        <div class="callout good">
-          <span class="callout-label">ทำไมไม่ควรลบ registry key</span>
-          <p>key <code>HARDWARE\ACPI\DSDT\VBOX__</code> ถูกสร้างขึ้นจาก firmware/ACPI table ของ hypervisor ทุกครั้งที่ boot
-          เครื่อง — ต่อให้ลบด้วยมือ ก็จะกลับมาใหม่ทันทีที่ restart แถมการแก้ HARDWARE hive ขณะ OS กำลังทำงานอยู่อาจทำให้ระบบไม่เสถียร
-          วิธีที่ปลอดภัยกว่าคือ patch ตัวไฟล์แทน</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">4</span><h3>Patch drop_encrypted_file (เทคนิคเดิมจาก Ch.2/4)</h3></div>
-      <div class="step-body">
-        <p>เปิด <code>drop_encrypted_file</code> ใน Ghidra → เจอ gate check แบบเดียวกันเป๊ะ (3 JNZ + 1 JZ)</p>
-        <div class="table-wrap">
-        <table>
-          <tr><th>Instruction</th><th class="mono">Before</th><th class="mono">After</th></tr>
-          <tr><td class="mono">JNZ (byte[15]=='O')</td><td class="mono before">75 21</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JNZ (byte[14]=='T')</td><td class="mono before">75 16</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JNZ (byte[13]=='U')</td><td class="mono before">75 0B</td><td class="mono after">90 90</td></tr>
-          <tr><td class="mono">JZ (byte[12]=='^')</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td></tr>
-        </table>
-        </div>
-        <p>Patch ด้วย x64dbg เหมือน Challenge 2/4 ทุกขั้นตอน แล้ว save file</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-head"><span class="step-num">5</span><h3>ทดสอบ</h3></div>
-      <div class="step-body">
-        <p>double-click ไฟล์ที่ patch แล้ว ควรขึ้น MessageBox:</p>
-        <div class="answer-box">
-          <span class="callout-label">ผลลัพธ์ที่ควรได้</span>
-          <div class="hex">Answer<br>Final Key (hex): 71 70 6b 72 7a 2e 2d 2c 2b 2a 29 28 27 26 2e 2d</div>
-        </div>
-        <div class="callout tip">
-          <span class="callout-label">สังเกต</span>
-          <p>hex นี้ตรงกับผลของ Challenge 4 เป๊ะ เพราะทั้งคู่ใช้ค่า decoy string <code>"notme12345678912"</code> ตัวเดียวกัน
-          (ที่มาจาก branch ที่ยังไม่ผ่านเงื่อนไข registry ตามธรรมชาติ) — ไม่ใช่ข้อผิดพลาด เป็นผลข้างเคียงปกติของเทคนิค
-          gate-bypass ที่ข้ามเงื่อนไขแทนที่จะแก้ให้ key ถูกจริง เหมือนที่อธิบายไว้ใน Challenge 5</p>
-        </div>
-      </div>
+    <p class="target-file"><code>VBoxDetection.exe</code></p>
+    <ol class="steps">
+      <li>DIE → ไม่ pack</li>
+      <li>Ghidra → Filter <code>custom_anti_analysis_check</code> — เช็ค registry 2 key: ต้องมี <code>Guest Additions</code> แต่ต้องไม่มี <code>DSDT\VBOX__</code> (ขัดแย้งกันเองถ้ารันบน VirtualBox จริง)</li>
+      <li>Filter หา <code>drop_encrypted_file</code> → หา 4 jump แบบเดียวกับ Ch.2/4</li>
+      <li>Patch: 3 <code>JNZ</code> → <code>NOP</code>, 1 <code>JZ</code> → <code>JMP &lt;ปลายทางเดิม&gt;</code></li>
+      <li><b>File → Export Program</b> → save เป็น <code>VBoxDetection_patched.exe</code> → รัน</li>
+    </ol>
+    <div class="answer-box">
+      <span class="lbl">Answer</span>
+      <div class="hex">Final Key (hex): 71 70 6b 72 7a 2e 2d 2c 2b 2a 29 28 27 26 2e 2d</div>
     </div>
 
     <!-- ============ CHEAT SHEET ============ -->
-    <h2 id="cheatsheet" class="sect-h">Cheat Sheet — ค่า offset ทั้งหมด</h2>
-    <p style="font-size:14.5px;color:var(--ink-dim);">อ้างอิงจากไฟล์ชุดที่ใช้ในแล็บนี้ (อาจต่างกันเล็กน้อยถ้าไฟล์ต้นฉบับถูก compile ใหม่) — ใช้ตรวจคำตอบหลัง patch เอง</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>ไฟล์</th><th>File Offset</th><th class="mono">Before</th><th class="mono">After</th><th>ฟังก์ชัน</th></tr>
-      <tr><td>Anti_Capture.exe</td><td class="mono">0xAAE</td><td class="mono before">74 36</td><td class="mono after">EB 36</td><td>custom_anti_analysis_check</td></tr>
-      <tr><td rowspan="4">Anti_Packing_unpacked.exe</td><td class="mono">0xC72</td><td class="mono before">75 21</td><td class="mono after">90 90</td><td rowspan="4">drop_encrypted_file</td></tr>
+    <h2 id="cheatsheet" class="sect-h">Cheat Sheet — offset ทั้งหมด</h2>
+    <div class="table-wrap"><table>
+      <tr><th>ไฟล์</th><th>Offset</th><th class="mono">Before</th><th class="mono">After</th></tr>
+      <tr><td>Anti_Capture.exe</td><td class="mono">0xAAE</td><td class="mono before">74 36</td><td class="mono after">EB 36</td></tr>
+      <tr><td rowspan="4">Anti_Packing_unpacked.exe</td><td class="mono">0xC72</td><td class="mono before">75 21</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC7D</td><td class="mono before">75 16</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC88</td><td class="mono before">75 0B</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC93</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td></tr>
-      <tr><td>Anti_Reverse.exe</td><td class="mono">—</td><td colspan="2" style="color:var(--ink-faint);">ไม่ต้อง patch — ลบ %APPDATA%\ghidra</td><td>is_payanak_installed</td></tr>
-      <tr><td rowspan="4">Anti_Temper.exe</td><td class="mono">0xEDA</td><td class="mono before">75 21</td><td class="mono after">90 90</td><td rowspan="4">drop_encrypted_file</td></tr>
+      <tr><td>Anti_Reverse.exe</td><td class="mono">—</td><td colspan="2" style="color:var(--ink-faint);">ลบ %APPDATA%\ghidra แทน</td></tr>
+      <tr><td rowspan="4">Anti_Temper.exe</td><td class="mono">0xEDA</td><td class="mono before">75 21</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xEE5</td><td class="mono before">75 16</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xEF0</td><td class="mono before">75 0B</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xEFB</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td></tr>
-      <tr><td>ClockCheck.exe</td><td class="mono">0x3601</td><td class="mono before">58</td><td class="mono after">34</td><td>data byte (custom_anti_analysis_check)</td></tr>
-      <tr><td rowspan="4">VBoxDetection.exe</td><td class="mono">0xC70</td><td class="mono before">75 21</td><td class="mono after">90 90</td><td rowspan="4">drop_encrypted_file</td></tr>
+      <tr><td>ClockCheck.exe</td><td class="mono">0x3601</td><td class="mono before">58</td><td class="mono after">34</td></tr>
+      <tr><td rowspan="4">VBoxDetection.exe</td><td class="mono">0xC70</td><td class="mono before">75 21</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC7B</td><td class="mono before">75 16</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC86</td><td class="mono before">75 0B</td><td class="mono after">90 90</td></tr>
       <tr><td class="mono">0xC91</td><td class="mono before">74 2D</td><td class="mono after">EB 2D</td></tr>
-    </table>
-    </div>
-    <div class="callout good">
-      <span class="callout-label">Tip การหา file offset เอง</span>
-      <p>ใน Ghidra: คลิกที่ instruction ใน Listing → เปิด <code>Window → Bytes</code> จะโชว์ raw hex ตรงตำแหน่งนั้น
-      เทียบกับ Virtual Address (VA) แล้วลบด้วย image base (<code>0x140000000</code> สำหรับไฟล์กลุ่มนี้) และ offset ของ section
-      (ดูได้จาก <code>Window → Memory Map</code>) จะได้ file offset ที่ตรงกับที่ hex editor ใช้</p>
-    </div>
+    </table></div>
 
     <footer>
-      <span>OPERATION AEGIS · FULL WALKTHROUGH · 6/6 CHALLENGES</span>
+      <span>OPERATION AEGIS · 6/6 SOLVED</span>
       <span>CP423322 / LAB 09</span>
     </footer>
 
